@@ -81,14 +81,20 @@ app.get('/orders',(req,res)=>{
   ordersCollection.find({email : req.query.email})
   .toArray((err,documents)=>{
     res.send(documents);
-
-  //   let totalPrice = 0;
-  //   for (let i = 0; i < documents.length; i++) {
-  //     const element = documents[i];
-  //     totalPrice = Number(element.price) + totalPrice;
-  // }
-  // console.log(totalPrice);
   })
+})
+
+// Delete Product
+
+app.delete('/delete/:id', (req, res) => {
+  productsCollection.deleteOne({ _id: ObjectId(req.params.id) })
+    .then(result => {
+      res.send(result.deletedCount > 0);
+      console.log(result);
+    })
+    .catch(error=>{
+      console.log(error);
+    })
 })
 
 });
