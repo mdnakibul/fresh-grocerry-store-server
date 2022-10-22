@@ -12,91 +12,94 @@ app.use(cors());
 const MongoClient = require('mongodb').MongoClient;
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.mymds.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-client.connect(err => {
-  const productsCollection = client.db("freshGroceryStore").collection("products");
-  const ordersCollection = client.db("freshGroceryStore").collection("orders");
-  // perform actions on the collection object
+client.connect(err, client => {
+  if (err) {
+    console.log('mongoDB connection error', err)
+  } else {
+    const productsCollection = client.db("freshGroceryStore").collection("products");
+    const ordersCollection = client.db("freshGroceryStore").collection("orders");
+    // perform actions on the collection object
 
-  //   Add Products 
+    //   Add Products 
 
-  app.post('/addProduct', (req, res) => {
-    const products = req.body
-    console.log('req');
-    res.send('some')
-    productsCollection.insertOne(products)
-      .then(result => {
-        console.log(result.insertedCount)
-      }).catch(error => {
-        console.log(error.message);
-      })
-  })
-  console.log('Database Connected');
-
-
-  // Load Products 
-
-app.get('/products',(req,res)=>{
-  productsCollection.find({})
-  .toArray((err,documents)=>{
-    res.send(documents)
-  })
-})
-
-// Load a single Product 
-
-app.get('/product/:id',(req,res)=>{
-  console.log(req.params);
-  productsCollection.find({_id : ObjectId(req.params.id)})
-  .toArray((err,document)=>{
-    res.send(document);
-  })
-})
-
-// Load Product By Keys 
-
-app.post('/productsByKeys', (req, res) => {
-  const productKeys = req.body;
-  productsCollection.find({key: { $in: productKeys} })
-  .toArray( (err, documents) => {
-      res.send(documents);
-  })
-})
-
-// Place Order 
-
-app.post('/addOrder', (req, res) => {
-  const order = req.body
-  console.log('req');
-  ordersCollection.insertOne(order)
-    .then(result => {
-      res.send(true)
-    }).catch(error => {
-      console.log(error.message);
+    app.post('/addProduct', (req, res) => {
+      const products = req.body
+      console.log('req');
+      res.send('some')
+      productsCollection.insertOne(products)
+        .then(result => {
+          console.log(result.insertedCount)
+        }).catch(error => {
+          console.log(error.message);
+        })
     })
-})
+    console.log('Database Connected');
 
-// Show Oders 
 
-app.get('/orders',(req,res)=>{
-  ordersCollection.find({email : req.query.email})
-  .toArray((err,documents)=>{
-    res.send(documents);
-  })
-})
+    // Load Products 
 
-// Delete Product
-
-app.delete('/delete/:id', (req, res) => {
-  productsCollection.deleteOne({ _id: ObjectId(req.params.id) })
-    .then(result => {
-      res.send(result.deletedCount > 0);
-      console.log(result);
+    app.get('/products', (req, res) => {
+      productsCollection.find({})
+        .toArray((err, documents) => {
+          res.send(documents)
+        })
     })
-    .catch(error=>{
-      console.log(error);
-    })
-})
 
+    // Load a single Product 
+
+    app.get('/product/:id', (req, res) => {
+      console.log(req.params);
+      productsCollection.find({ _id: ObjectId(req.params.id) })
+        .toArray((err, document) => {
+          res.send(document);
+        })
+    })
+
+    // Load Product By Keys 
+
+    app.post('/productsByKeys', (req, res) => {
+      const productKeys = req.body;
+      productsCollection.find({ key: { $in: productKeys } })
+        .toArray((err, documents) => {
+          res.send(documents);
+        })
+    })
+
+    // Place Order 
+
+    app.post('/addOrder', (req, res) => {
+      const order = req.body
+      console.log('req');
+      ordersCollection.insertOne(order)
+        .then(result => {
+          res.send(true)
+        }).catch(error => {
+          console.log(error.message);
+        })
+    })
+
+    // Show Oders 
+
+    app.get('/orders', (req, res) => {
+      ordersCollection.find({ email: req.query.email })
+        .toArray((err, documents) => {
+          res.send(documents);
+        })
+    })
+
+    // Delete Product
+
+    app.delete('/delete/:id', (req, res) => {
+      productsCollection.deleteOne({ _id: ObjectId(req.params.id) })
+        .then(result => {
+          res.send(result.deletedCount > 0);
+          console.log(result);
+        })
+        .catch(error => {
+          console.log(error);
+        })
+    })
+  }
 });
 
 
